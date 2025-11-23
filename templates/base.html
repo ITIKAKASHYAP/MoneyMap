@@ -39,19 +39,31 @@
             <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(0,0,0,0.1);">
                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px; color:var(--text-main);">
                     <div style="width:32px; height:32px; background:var(--primary); border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; font-weight:bold;">
-                        {{ user.username[0].upper() }}
+                        {% if user %}
+                            {{ user.username[0].upper() }}
+                        {% else %}
+                            U
+                        {% endif %}
                     </div>
-                    <div style="font-size:0.9rem; font-weight:600;">{{ user.username }}</div>
+                    <div style="font-size:0.9rem; font-weight:600;">
+                        {% if user %}
+                            {{ user.username }}
+                        {% else %}
+                            Guest
+                        {% endif %}
+                    </div>
                 </div>
-                <button onclick="logout()" class="btn btn-danger" style="width:100%; font-size:0.85rem; padding:10px;">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
+
+                {% if user %}
+                    <button onclick="logout()" class="btn btn-danger" style="width:100%; font-size:0.85rem; padding:10px;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                {% endif %}
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- ID app-content is used by JS to swap pages smoothly -->
             <div id="app-content" class="animate-enter delay-1">
                 <h1 style="margin-bottom:25px; color:var(--text-main);">{{ page|capitalize }}</h1>
                 {% block content %}{% endblock %}
