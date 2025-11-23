@@ -80,10 +80,12 @@ def get_current_user():
     return None
 
 # --- ROUTES ---
-@app.route("/")
-@login_required
-def dashboard():
-    return render_template("dashboard.html", page="dashboard", user=get_current_user())
+@app.route('/')
+def home():
+    user = get_current_user()
+    if not user:
+        return redirect("/login")
+    return render_template("dashboard.html", page="dashboard", user=user)
 
 @app.route("/expenses")
 @login_required
@@ -268,4 +270,5 @@ def api_profile():
     return jsonify({"message":"Updated"})
 
 if __name__ == "__main__":
+
     app.run(debug=True)
