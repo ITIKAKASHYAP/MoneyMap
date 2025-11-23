@@ -81,7 +81,7 @@ def get_current_user():
 
 # --- ROUTES ---
 @app.route('/')
-def home():
+def dashboard():
     user = get_current_user()
     if not user:
         return redirect("/login")
@@ -272,3 +272,4 @@ def api_profile():
 if __name__ == "__main__":
 
     app.run(debug=True)
+
