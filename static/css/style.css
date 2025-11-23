@@ -1,6 +1,6 @@
 /* --- 1. GLOBAL RESETS & VARIABLES --- */
 :root {
-    /* Color Palette - User Defined Blue Theme */
+    /* Color Palette */
     --bg-color: #EFECE3;
     --text-main: #000000;
     --text-muted: #4A70A9;
@@ -13,10 +13,11 @@
     --card-bg: #FFFFFF;
     --input-bg: #F8F9FA;
     
-    /* Dimensions & Spacing */
+    /* Dimensions & Spacing (Default / Large Screens) */
     --sidebar-width: 280px;
-    --header-height: 70px;
     --border-radius: 16px;
+    --card-padding: 2.5rem;
+    --input-padding: 1rem 1.25rem;
     
     /* Shadows */
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
@@ -48,14 +49,15 @@ body {
     background-color: var(--bg-color);
     color: var(--text-main);
     height: 100vh;
-    overflow: hidden; /* Prevent body scroll, handle in main-content */
+    width: 100vw;
+    overflow: hidden;
 }
 
-/* --- 2. DASHBOARD LAYOUT (The Fix) --- */
+/* --- 2. RESPONSIVE LAYOUT STRUCTURE --- */
 .app-layout {
     display: flex;
     width: 100%;
-    height: 100vh;
+    height: 100%;
 }
 
 /* Sidebar Styles */
@@ -69,11 +71,23 @@ body {
     border-right: 1px solid rgba(0,0,0,0.05);
     box-shadow: var(--shadow-sm);
     z-index: 10;
-    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    flex-shrink: 0;
+    transition: width 0.3s ease; /* Smooth resize */
 }
 
+.main-content {
+    flex: 1;
+    padding: 3rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: var(--bg-color);
+    position: relative;
+    transition: padding 0.3s ease; /* Smooth resize */
+}
+
+/* --- 3. COMPONENTS & CARDS --- */
 .brand {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--primary);
     margin-bottom: 3rem;
@@ -85,7 +99,7 @@ body {
 .nav-links {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 0.5rem;
     flex-grow: 1;
 }
 
@@ -95,7 +109,6 @@ body {
     padding: 1rem 1.2rem;
     border-radius: var(--border-radius);
     font-weight: 500;
-    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -110,81 +123,142 @@ body {
     transform: translateX(5px);
 }
 
-/* Main Content Area */
-.main-content {
-    flex: 1;
-    padding: 3rem; /* Increased padding */
-    overflow-y: auto; /* Allow scrolling within content area */
-    background-color: var(--bg-color);
-    position: relative;
-}
-
-/* --- 3. COMPONENTS & CARDS --- */
+/* Cards */
 .card {
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
-    padding: 2.5rem; /* More internal spacing */
+    padding: var(--card-padding);
     box-shadow: var(--shadow-md);
-    margin-bottom: 2.5rem; /* More vertical spacing */
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 2rem;
     border: 1px solid rgba(0,0,0,0.02);
 }
 
-.card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
+/* --- 4. RESPONSIVE GRID SYSTEMS --- */
 
-/* Grid Systems */
+/* Standard Grid */
 .grid-3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem; /* Increased gap */
+    gap: 2rem;
     margin-bottom: 2.5rem;
 }
 
+/* Expense Section Grid */
 .grid-2 {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem; /* Increased gap */
+    grid-template-columns: repeat(2, 1fr); /* Default: Side by Side */
+    gap: 2rem;
     margin-bottom: 2.5rem;
 }
 
-@media (max-width: 1200px) {
-    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+/* --- MEDIA QUERIES (RESPONSIVE LOGIC) --- */
+
+/* 1. Laptops (15 inch and smaller) & Tablets (Below 1500px) */
+/* This creates the "Reduced" and "Top/Bottom" effect you wanted */
+@media (max-width: 1500px) {
+    :root {
+        /* Reduce sizing variables for compact laptop view */
+        --card-padding: 1.5rem;      /* Smaller padding inside cards */
+        --input-padding: 0.75rem 1rem; /* Smaller inputs */
+        --sidebar-width: 240px;      /* Slightly slimmer sidebar */
+    }
+
+    .main-content {
+        padding: 1.5rem; /* Reduce page padding */
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr; /* Force Vertical Stack (Top/Bottom) */
+        gap: 1.5rem;
+    }
+    
+    .grid-3 {
+        /* Keep dashboard stats side-by-side but maybe tighter? */
+        /* grid-template-columns: repeat(3, 1fr);  Stay 3 cols if space permits */
+        gap: 1.5rem;
+    }
+    
+    .brand { margin-bottom: 2rem; }
+    .sidebar { padding: 1.5rem; }
 }
+
+/* 2. Smaller Laptops / Tablets (Below 1100px) */
+@media (max-width: 1100px) {
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr); /* 2 stats per row */
+    }
+}
+
+/* 3. Mobile Devices (Below 768px) */
 @media (max-width: 768px) {
-    .grid-3, .grid-2 { grid-template-columns: 1fr; }
-    .sidebar { display: none; } /* Or use a toggle for mobile */
+    .app-layout {
+        flex-direction: column;
+        height: 100vh; /* Ensure full height */
+        overflow: hidden; /* Prevent body scroll */
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto; /* Fixed height sidebar */
+        padding: 1rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        flex-shrink: 0; /* Prevent shrinking */
+    }
+
+    .brand { margin-bottom: 0; font-size: 1.2rem; }
+
+    .nav-links {
+        flex-direction: row;
+        gap: 0.5rem;
+        overflow-x: auto;
+        display: flex; 
+        flex-grow: 0;
+    }
+    
+    .nav-links a span { display: none; } /* Hide text, show icons */
+    .nav-links a { padding: 0.5rem 0.8rem; margin-bottom: 0; justify-content: center; }
+    
+    .sidebar > div:last-child { display: none; } /* Hide user profile summary on mobile */
+
+    .main-content {
+        padding: 1rem;
+        overflow-y: auto; /* Enable scrolling */
+        height: calc(100vh - 70px); /* Adjust height based on sidebar/header height (approx 70px) */
+        padding-bottom: 80px; /* Add padding to bottom so content isn't cut off */
+    }
+
+    .grid-3 { grid-template-columns: 1fr; } /* 1 col stats */
+    
+    /* Stack Expense Form & History Vertically */
+    .grid-2 { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 1.5rem; 
+    }
+    
+    .form-row { flex-direction: column; gap: 1rem; } /* Stack inputs */
+    
+    .stat-value { font-size: 2rem; }
+    
+    /* Mobile: Keep cards compact */
+    .card { padding: 1.5rem; margin-bottom: 1.5rem; }
 }
 
-/* Stats */
-.stat-label {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 0.75rem;
-}
-
-.stat-value {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: var(--text-main);
-}
-
-/* Inputs & Forms */
+/* --- INPUTS & FORMS --- */
 .input {
     width: 100%;
-    padding: 1rem 1.25rem;
+    padding: var(--input-padding);
     border: 2px solid transparent;
     background-color: var(--input-bg);
     border-radius: var(--border-radius);
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 0.95rem; /* Slightly smaller font for compact feel */
     color: var(--text-main);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
     transition: all 0.2s ease;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
@@ -198,7 +272,7 @@ body {
 
 .form-row {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 .form-row > * { flex: 1; }
 
@@ -214,84 +288,47 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1rem;
     box-shadow: 0 4px 6px rgba(74, 112, 169, 0.2);
 }
 
-.btn:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(74, 112, 169, 0.3);
+.btn:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+.btn-danger { background-color: var(--accent); }
+
+/* --- TABLES (Scrollable) --- */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block; /* Force block behavior for scroll */
 }
 
-.btn-danger {
-    background-color: var(--accent);
-    box-shadow: 0 4px 6px rgba(217, 83, 79, 0.2);
-}
-
-.btn-danger:hover {
-    background-color: #c9302c;
-    box-shadow: 0 6px 12px rgba(217, 83, 79, 0.3);
-}
-
-/* Tables */
 table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 0.5rem; /* Spacing between rows */
-    margin-top: 1rem;
+    border-spacing: 0 0.5rem;
+    margin-top: 0.5rem;
+    min-width: 500px; /* Ensure table doesn't squash too much */
 }
 
 th {
     text-align: left;
-    padding: 1.25rem;
+    padding: 1rem;
     color: var(--text-muted);
     font-weight: 700;
     text-transform: uppercase;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     border-bottom: 2px solid rgba(0,0,0,0.05);
 }
 
 td {
-    padding: 1.25rem;
+    padding: 1rem;
     background-color: var(--input-bg);
     color: var(--text-main);
-    border-top: 1px solid rgba(0,0,0,0.02);
-    border-bottom: 1px solid rgba(0,0,0,0.02);
+    border-radius: 8px;
 }
 
-td:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
-td:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
-
-tr:hover td {
-    background-color: #fff;
-    transform: scale(1.01);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    transition: all 0.2s ease;
-}
-
-/* --- 4. ANIMATIONS --- */
-.animate-enter {
-    animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    opacity: 0;
-}
-
-@keyframes slideUpFade {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
-
-/* --- 5. LOGIN PAGE SPECIFIC (Strict Isolation) --- */
+/* --- LOGIN PAGE --- */
 body.login-page {
     background-color: var(--bg-color);
     display: flex;
@@ -300,143 +337,39 @@ body.login-page {
     height: 100vh;
     overflow: hidden;
 }
-
 .login-container {
-    background-color: #fff;
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-    position: relative;
-    overflow: hidden;
-    width: 960px;
-    max-width: 95%;
-    min-height: 640px;
+    background-color: #fff; border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    width: 900px; max-width: 95%; min-height: 600px;
+    position: relative; overflow: hidden;
 }
-
-.form-container {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    transition: all 0.6s ease-in-out;
-}
-
-.login-page form {
-    background-color: #FFFFFF;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 60px;
-    height: 100%;
-    text-align: center;
-}
-
-.login-page h1 {
-    font-weight: 800;
-    margin-bottom: 1.5rem;
-    color: #333;
-    font-size: 2.2rem;
-}
-
-.login-page span {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 1.5rem;
-}
-
-.login-page input {
-    background-color: #eee;
-    border: none;
-    padding: 1rem 1.25rem;
-    margin: 0.5rem 0;
-    width: 100%;
-    color: #333;
-    border-radius: 8px;
-}
-
+.form-container { position: absolute; top: 0; height: 100%; transition: all 0.6s ease-in-out; }
+.login-page form { background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 50px; height: 100%; text-align: center; }
+.login-page h1 { color: #333; margin-bottom: 1rem; }
+.login-page input { background: #eee; border: none; padding: 1rem; margin: 0.5rem 0; width: 100%; color: #333; border-radius: 8px; }
 .sign-in-container { left: 0; width: 50%; z-index: 2; }
 .sign-up-container { left: 0; width: 50%; opacity: 0; z-index: 1; }
 
 .login-container.right-panel-active .sign-in-container { transform: translateX(100%); }
-.login-container.right-panel-active .sign-up-container {
-    transform: translateX(100%);
-    opacity: 1;
-    z-index: 5;
-    animation: show 0.6s;
-}
-
+.login-container.right-panel-active .sign-up-container { transform: translateX(100%); opacity: 1; z-index: 5; animation: show 0.6s; }
 @keyframes show { 0%, 49.99% { opacity: 0; z-index: 1; } 50%, 100% { opacity: 1; z-index: 5; } }
 
-.overlay-container {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 50%;
-    height: 100%;
-    overflow: hidden;
-    transition: transform 0.6s ease-in-out;
-    z-index: 100;
-}
-
+.overlay-container { position: absolute; top: 0; left: 50%; width: 50%; height: 100%; overflow: hidden; transition: transform 0.6s ease-in-out; z-index: 100; }
 .login-container.right-panel-active .overlay-container { transform: translateX(-100%); }
-
-.overlay {
-    background: linear-gradient(to right, var(--primary), var(--secondary));
-    color: #FFFFFF;
-    position: relative;
-    left: -100%;
-    height: 100%;
-    width: 200%;
-    transform: translateX(0);
-    transition: transform 0.6s ease-in-out;
-}
-
+.overlay { background: linear-gradient(to right, var(--primary), var(--secondary)); color: #fff; position: relative; left: -100%; height: 100%; width: 200%; transform: translateX(0); transition: transform 0.6s ease-in-out; }
 .login-container.right-panel-active .overlay { transform: translateX(50%); }
-
-.overlay-panel {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 40px;
-    text-align: center;
-    top: 0;
-    height: 100%;
-    width: 50%;
-    transform: translateX(0);
-    transition: transform 0.6s ease-in-out;
-}
-
+.overlay-panel { position: absolute; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 0 40px; text-align: center; top: 0; height: 100%; width: 50%; transform: translateX(0); transition: transform 0.6s ease-in-out; }
 .overlay-left { transform: translateX(-20%); }
 .login-container.right-panel-active .overlay-left { transform: translateX(0); }
 .overlay-right { right: 0; transform: translateX(0); }
 .login-container.right-panel-active .overlay-right { transform: translateX(20%); }
 
-.ghost {
-    background-color: transparent;
-    border-color: #FFFFFF;
-    border: 2px solid #FFFFFF;
-    color: #FFFFFF;
-    padding: 12px 45px;
-    font-weight: 700;
-    margin-top: 20px;
-    border-radius: 50px;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: transform 0.2s ease;
-}
+.ghost { background: transparent; border: 1px solid #fff; color: #fff; padding: 12px 45px; border-radius: 50px; font-weight: 700; margin-top: 20px; cursor: pointer; }
+.auth-footer { position: absolute; bottom: 20px; color: #888; font-size: 0.8rem; }
 
-.ghost:hover {
-    background-color: rgba(255,255,255,0.1);
-    transform: scale(1.05);
-}
-
-/* Footer for Login Page */
-.auth-footer {
-    position: absolute;
-    bottom: 20px;
-    color: #888;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
+/* --- ANIMATIONS --- */
+.animate-enter { animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
