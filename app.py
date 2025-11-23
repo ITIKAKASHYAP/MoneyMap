@@ -90,10 +90,33 @@ def dashboard():
 def expenses_page():
     return render_template("expenses.html", page="expenses", user=get_current_user())
 
-@app.route("/analytics")
+
+@app.route("/api/analytics", methods=["GET"])
 @login_required
-def analytics_page():
-    return render_template("analytics.html", page="analytics", user=get_current_user())
+def api_analytics():
+    user = get_current_user()
+    conn = get_db(); cur = conn.cursor()
+    cat_tot={}; monthly={}; total=0; budget=0
+    
+    cur.execute("SELECT category, SUM(amount) as t FROM expenses WHERE user_id=? GROUP BY category", (user["id"],))
+    for r in cur.fetchall(): cat_tot[r["category"]] = r["t"]
+    
+    cur.execute("SELECT strftime('%Y-%m', date) as m, SUM(amount) as t FROM expenses WHERE user_id=? GROUP BY m", (user["id"],))
+    for r in cur.fetchall(): monthly[r["m"]] = r["t"]
+    
+    cur.execute("SELECT SUM(amount) FROM expenses WHERE user_id=?", (user["id"],)); total = cur.fetchone()[0] or 0
+    cur.execute("SELECT amount FROM budgets WHERE user_id=?", (user["id"],)); b = cur.fetchone()
+    budget = b["amount"] if b else 0
+    conn.close()
+    
+    return jsonify({
+        "categories": list(cat_tot.keys()), 
+        "category_amounts": list(cat_tot.values()),
+        "months": sorted(list(monthly.keys())), 
+        "monthly_amounts": [monthly[k] for k in sorted(monthly.keys())],
+        "total_spent": total, 
+        "budget": budget
+    })
 
 @app.route("/budget")
 @login_required
@@ -240,3 +263,4 @@ def api_profile():
 # ---- RUN ----
 if __name__ == "__main__":
     app.run(debug=True)
+
