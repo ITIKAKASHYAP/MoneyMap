@@ -1,0 +1,5 @@
+Flask>=2.0
+python-dotenv
+cloudant     # optional: only required if you plan to use Cloudant; pip will install it but app works without it
+Werkzeug
+Flask-Cors
