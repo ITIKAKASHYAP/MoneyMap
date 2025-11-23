@@ -208,6 +208,56 @@ def api_logout():
     session.clear()
     return jsonify({"message":"Logged out"})
 
+@app.route("/api/profile", methods=["PUT"])
+@login_required
+def api_profile():
+    """API endpoint for updating user email and password."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "User not authenticated"}), 401
+
+    data = request.json or {}
+    new_email = data.get("email", "").strip()
+    new_password = data.get("new_password", "")
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    email_updated = False
+    password_updated = False
+
+    # 1. Update Email Logic
+    # Only proceed if a new email is provided and it's different from the current one
+    if new_email and new_email != user.get("email"):
+        # Check if new email is already taken by another user
+        cur.execute("SELECT id FROM users WHERE email=? AND id != ?", (new_email, user["id"]))
+        if cur.fetchone():
+            conn.close()
+            return jsonify({"error": "Email already registered by another account"}), 400
+        
+        # Update email
+        cur.execute("UPDATE users SET email = ? WHERE id = ?", (new_email, user["id"]))
+        email_updated = True
+
+    # 2. Update Password Logic
+    if new_password:
+        # Require a minimum password length
+        if len(new_password) < 6:
+            conn.close()
+            return jsonify({"error": "New password must be at least 6 characters long"}), 400
+            
+        pwd_hash = generate_password_hash(new_password)
+        cur.execute("UPDATE users SET password_hash = ? WHERE id = ?", (pwd_hash, user["id"]))
+        password_updated = True
+        
+    conn.commit()
+    conn.close()
+    
+    if not email_updated and not password_updated:
+        return jsonify({"message": "No changes submitted"}), 200
+
+    return jsonify({"message": "Credentials updated successfully"}), 200
+
 
 # ---------------- EXPENSES API ----------------
 @app.route("/api/expenses", methods=["GET","POST"])
