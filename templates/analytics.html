@@ -1,8 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="grid-2">
-    <div class="card"><h3>Category Breakdown</h3><canvas id="catChart"></canvas></div>
-    <div class="card"><h3>Monthly Trend</h3><canvas id="trendChart"></canvas></div>
+    <div class="card">
+        <h3>Category Breakdown</h3>
+        <canvas id="catChart"></canvas>
+    </div>
+    <div class="card">
+        <h3>Monthly Trend</h3>
+        <canvas id="trendChart"></canvas>
+    </div>
 </div>
 {% endblock %}
-{% block scripts %}<script>loadAnalyticsPage();</script>{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+fetch("/api/analytics")
+  .then(res => res.json())
+  .then(data => {
+      // Category chart
+      const catCtx = document.getElementById("catChart").getContext("2d");
+      new Chart(catCtx, {
+          type: "pie",
+          data: {
+              labels: data.categories,
+              datasets: [{
+                  data: data.category_amounts,
+              }]
+          }
+      });
+
+      // Monthly trend chart
+      const trendCtx = document.getElementById("trendChart").getContext("2d");
+      new Chart(trendCtx, {
+          type: "line",
+          data: {
+              labels: data.months,
+              datasets: [{
+                  data: data.monthly_amounts,
+                  tension: 0.3
+              }]
+          }
+      });
+  })
+  .catch(err => console.log("Analytics Error:", err));
+</script>
+{% endblock %}
